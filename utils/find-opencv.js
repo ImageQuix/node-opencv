@@ -22,6 +22,7 @@ function main(){
             }
         }
         else{
+            stdout = stdout.replace(new RegExp('-l-framework', 'g'), '-framework');
             console.log(stdout);
         }
     });

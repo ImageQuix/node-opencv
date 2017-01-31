@@ -24,7 +24,7 @@
       ],
 
       "libraries": [
-        "<!@(node utils/find-opencv.js --libs)"
+        "<!(node utils/find-opencv.js --libs)"
       ],
       # For windows
 
@@ -104,7 +104,7 @@
       ],
 
       "libraries": [
-        "<!@(node utils/find-opencv.js --libs)",
+        "<!(node utils/find-opencv.js --libs)"
       ],
       # For windows
 
