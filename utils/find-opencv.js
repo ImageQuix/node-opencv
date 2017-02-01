@@ -11,21 +11,21 @@ var flag = process.argv[2] || "--exists";
 var opencv = process.env.PKG_CONFIG_OPENCV3 === "1" ? "opencv3" : '"opencv >= 2.3.1"';
 
 function main(){
-    //Try using pkg-config, but if it fails and it is on Windows, try the fallback
-    exec("pkg-config " + opencv + " " + flag, function(error, stdout, stderr){
-        if(error){
-            if(process.platform === "win32"){
-                fallback();
-            }
-            else{
-                throw new Error("ERROR: failed to run: pkg-config", opencv, flag);
-            }
+    if (process.platform !== "win32") {
+        var path = process.env.OPENCV_DIR;
+        if (path[path.length - 1] === '/') {
+            path = path.substr(0, path.length - 1);
         }
-        else{
-            stdout = stdout.replace(new RegExp('-l-framework', 'g'), '-framework');
-            console.log(stdout);
+
+        if (flag === '--libs') {
+            console.log(`-L${path}/lib -L${path}/share/OpenCV/3rdparty/lib -lopencv_contrib -lopencv_stitching -lopencv_nonfree -lopencv_superres -lopencv_ocl -lopencv_ts -lopencv_videostab -lopencv_gpu -lopencv_photo -lopencv_objdetect -lopencv_legacy -lopencv_video -lopencv_ml -lopencv_calib3d -lopencv_features2d -lopencv_highgui -lIlmImf -llibtiff -llibpng -llibjpeg -lopencv_imgproc -lopencv_flann -lopencv_core -lzlib -framework OpenCL -framework AppKit -framework QuartzCore -framework QTKit -framework Cocoa -lstdc++`);
+        } else if (flag === '--cflags') {
+            console.log(`-I${path}/include/opencv -I${path}/include`);
         }
-    });
+    }
+    else {
+        fallback();
+    }
 }
 
 //======================Windows Specific=======================================
@@ -51,7 +51,7 @@ function printPaths(opencvPath){
         console.log("\"" + opencvPath + "\\..\\..\\include\\opencv\"");
     }
     else if(flag === "--libs") {
-        var libPath = opencvPath + "\\lib\\";
+        var libPath = opencvPath + "\\staticlib\\";
 
         fs.readdir(libPath, function(err, files){
             if(err){
@@ -64,6 +64,7 @@ function printPaths(opencvPath){
                     libs = libs + " \"" + libPath + files[i] + "\" \r\n ";
                 }
             }
+            libs += " \"" + "vfw32.lib" + "\" \r\n ";
             console.log(libs);
         });
     }
