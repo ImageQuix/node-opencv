@@ -51,6 +51,6 @@ Now, take note of current dir, e.g., `/Users/user/Downloads/opencv-2.4.13/macbui
 pwd
 ```
 
-Now, set an environment variable to that path plus `/install`, e.g., `/Users/user/Downloads/opencv-2.4.13/macbuild/install`
+Now, set `OPENCV_DIR` environment variable to that path plus `/install`, e.g., `/Users/user/Downloads/opencv-2.4.13/macbuild/install`
 
 Whenever node-opencv is built, opencv will be bundled in it.
