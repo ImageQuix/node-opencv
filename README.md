@@ -1,242 +1,56 @@
 # node-opencv
 
-[![Build Status](https://secure.travis-ci.org/peterbraden/node-opencv.png)](http://travis-ci.org/peterbraden/node-opencv)
-[![Coverage](http://codecov.io/github/peterbraden/node-opencv/coverage.svg?branch=master)](https://codecov.io/gh/peterbraden/node-opencv)
+Modified node-opencv to support static bundling of opencv
 
-[OpenCV](http://opencv.org) bindings for Node.js. OpenCV is
-the defacto computer vision library - by interfacing with it natively in node,
-we get powerful real time vision in js.
+## For windows with Visual Studio 2015 build tools:
 
-People are using node-opencv to fly control quadrocoptors, detect faces from
-webcam images and annotate video streams. If you're using it for something
-cool, I'd love to hear about it!
+Download 2.4.13 version of opencv with vc14:
+https://github.com/opencv/opencv/releases/download/2.4.13.2/opencv-2.4.13.2-vc14.exe
 
-## Install
+Install/extract to some dir, e.g., `C:\OpenCV`
+Set `OPENCV_DIR` environment variable to that path plus `\build\x64\vc14`, e.g., `C:\OpenCV\build\x64\vc14`
 
-You'll need OpenCV 2.3.1 or newer installed before installing node-opencv.  Note
-that OpenCV 3.x is not yet fully supported.
+Now, whenever node-opencv is built, opencv will be bundled in it.
 
-## Specific for Windows
-1. Download and install OpenCV (Be sure to use a 2.4 version) @
-http://opencv.org/downloads.html
-For these instructions we will assume OpenCV is put at C:\OpenCV, but you can
-adjust accordingly.
+## For OSX
 
-2. If you haven't already, create a system variable called OPENCV_DIR and set it
-   to C:\OpenCV\build\x64\vc12
+Download OpenCV source code:
+https://github.com/opencv/opencv/archive/2.4.13.2.zip
 
-   Make sure the "x64" part matches the version of NodeJS you are using.
+Extract to any dir, e.g., `~/Downloads/opencv-2.4.13`
 
-   Also add the following to your system PATH
-        ;%OPENCV_DIR%\bin
+`cd` to that dir
 
-3. Install Visual Studio 2013. Make sure to get the C++ components.
-   You can use a different edition, just make sure OpenCV supports it, and you
-   set the "vcxx" part of the variables above to match.
+run:
 
-4. Download peterbraden/node-opencv fork
-git clone https://github.com/peterbraden/node-opencv
-
-5. run npm install
-
-```bash
-$ npm install opencv
+```
+mkdir macbuild && cd macbuild
 ```
 
-## Examples
-Run the examples from the parent directory.
+With `cmake` installed (can install via brew), run:
 
-### Face Detection
-
-```javascript
-cv.readImage("./examples/files/mona.png", function(err, im){
-  im.detectObject(cv.FACE_CASCADE, {}, function(err, faces){
-    for (var i=0;i<faces.length; i++){
-      var x = faces[i]
-      im.ellipse(x.x + x.width/2, x.y + x.height/2, x.width/2, x.height/2);
-    }
-    im.save('./out.jpg');
-  });
-})
+```
+cmake .. -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS_RELEASE=-DNDEBUG -DCMAKE_CXX_FLAGS_RELEASE=-DNDEBUG -DCMAKE_INSTALL_PREFIX="./install" -DCMAKE_BUILD_TYPE=Release -DCMAKE_FIND_FRAMEWORK=LAST -DCMAKE_VERBOSE_MAKEFILE=ON -Wno-dev -DHAVE_CLOCK_GETTIME:INTERNAL=0 -DCMAKE_OSX_DEPLOYMENT_TARGET= -DWITH_TBB=OFF -DWITH_FFMPEG=OFF -DWITH_QUICKTIME=OFF -DWITH_1394=OFF -DWITH_OPENGL=OFF -DWITH_JASPER=OFF -DWITH_GSTREAMER=OFF -DWITH_XIMEA=OFF -DWITH_VTK=OFF -DWITH_CUDA=OFF -DENABLE_SSSE3=ON -DENABLE_SSE41=ON -DENABLE_SSE42=ON -DENABLE_AVX=ON
 ```
 
+Now `make`, which could take ~10 minutes:
 
-## API Documentation
-
-### Matrix
-
-The [matrix](http://opencv.jp/opencv-2svn_org/cpp/core_basic_structures.html#mat) is the most useful
-base data structure in OpenCV. Things like images are just matrices of pixels.
-
-#### Creation
-
-```javascript
-new Matrix(rows, cols)
+```
+make -j4
 ```
 
-Or if you're thinking of a Matrix as an image:
+Now `make install`:
 
-```javascript
-new Matrix(height, width)
+```
+make install
 ```
 
-Or you can use opencv to read in image files. Supported formats are in the OpenCV docs, but jpgs etc are supported.
+Now, take note of current dir, e.g., `/Users/user/Downloads/opencv-2.4.13/macbuild`
 
-```javascript
-cv.readImage(filename, function(err, mat){
-  ...
-})
-
-cv.readImage(buffer, function(err, mat){
-  ...
-})
+```
+pwd
 ```
 
-If you need to pipe data into an image, you can use an ImageDataStream:
+Now, set an environment variable to that path plus `/install`, e.g., `/Users/user/Downloads/opencv-2.4.13/macbuild/install`
 
-```javascript
-var s = new cv.ImageDataStream()
-
-s.on('load', function(matrix){
-  ...
-})
-
-fs.createReadStream('./examples/files/mona.png').pipe(s);
-```
-
-If however, you have a series of images, and you wish to stream them into a
-stream of Matrices, you can use an ImageStream. Thus:
-
-```javascript
-var s = new cv.ImageStream()
-
-s.on('data', function(matrix){
-   ...
-})
-
-ardrone.createPngStream().pipe(s);
-```
-
-Note: Each 'data' event into the ImageStream should be a complete image buffer.
-
-
-
-#### Accessing Data
-
-```javascript
-var mat = new cv.Matrix.Eye(4,4); // Create identity matrix
-
-mat.get(0,0) // 1
-
-mat.row(0)  // [1,0,0,0]
-mat.col(4)  // [0,0,0,1]
-```
-
-##### Save
-
-```javascript
-mat.save('./pic.jpg')
-```
-
-or:
-
-```javascript
-var buff = mat.toBuffer()
-```
-
-#### Image Processing
-
-```javascript
-im.convertGrayscale()
-im.canny(5, 300)
-im.houghLinesP()
-```
-
-
-#### Simple Drawing
-
-```javascript
-im.ellipse(x, y)
-im.line([x1,y1], [x2, y2])
-```
-
-#### Object Detection
-
-There is a shortcut method for
-[Viola-Jones Haar Cascade](http://docs.opencv.org/trunk/d7/d8b/tutorial_py_face_detection.html) object
-detection. This can be used for face detection etc.
-
-```javascript
-mat.detectObject(haar_cascade_xml, opts, function(err, matches){})
-```
-
-For convenience in face detection, cv.FACE_CASCADE is a cascade that can be used for frontal face detection.
-
-Also:
-
-```javascript
-mat.goodFeaturesToTrack
-```
-
-#### Contours
-
-```javascript
-mat.findCountours
-mat.drawContour
-mat.drawAllContours
-```
-
-### Using Contours
-
-`findContours` returns a `Contours` collection object, not a native array. This object provides
-functions for accessing, computing with, and altering the contours contained in it.
-See [relevant source code](src/Contours.cc) and [examples](examples/)
-
-```javascript
-var contours = im.findContours();
-
-// Count of contours in the Contours object
-contours.size();
-
-// Count of corners(verticies) of contour `index`
-contours.cornerCount(index);
-
-// Access vertex data of contours
-for(var c = 0; c < contours.size(); ++c) {
-  console.log("Contour " + c);
-  for(var i = 0; i < contours.cornerCount(c); ++i) {
-    var point = contours.point(c, i);
-    console.log("(" + point.x + "," + point.y + ")");
-  }
-}
-
-// Computations of contour `index`
-contours.area(index);
-contours.arcLength(index, isClosed);
-contours.boundingRect(index);
-contours.minAreaRect(index);
-contours.isConvex(index);
-contours.fitEllipse(index);
-
-// Destructively alter contour `index`
-contours.approxPolyDP(index, epsilon, isClosed);
-contours.convexHull(index, clockwise);
-```
-
-## Test
-
-Using [tape](https://github.com/substack/tape). Run with command:
-
-`npm test`.
-
-## Code coverage
-
-Using [istanbul](http://gotwarlost.github.io/istanbul/) and [lcov](http://ltp.sourceforge.net/coverage/lcov.php). Run with command:
-
-`make cover`
-
-Build version of `opencv.node` will be generated, and coverage files will be put in `coverage/` directory. These files can be remvoved automatically by running `make clean`.
-
-## MIT License
-The library is distributed under the MIT License - if for some reason that
-doesn't work for you please get in touch.
+Whenever node-opencv is built, opencv will be bundled in it.
