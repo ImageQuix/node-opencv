@@ -22,10 +22,6 @@
         "src/Stereo.cc",
         "src/LDAWrap.cc"
       ],
-
-      "libraries": [
-        "<!(node utils/find-opencv.js --libs)"
-      ],
       # For windows
 
       "include_dirs": [
@@ -44,6 +40,9 @@
             ]
         }],
         [ "OS==\"win\"", {
+            "libraries": [
+              "<!@(node utils/find-opencv.js --libs)"
+            ],
             "cflags": [
               "-Wall"
             ],
@@ -59,6 +58,9 @@
         }],
         [ # cflags on OS X are stupid and have to be defined like this
           "OS==\"mac\"", {
+            "libraries": [
+              "<!(node utils/find-opencv.js --libs)"
+            ],
             "xcode_settings": {
               "OTHER_CFLAGS": [
                 "-mmacosx-version-min=10.7",
@@ -102,10 +104,6 @@
       "sources": [
         "test/nativemat.cc",
       ],
-
-      "libraries": [
-        "<!(node utils/find-opencv.js --libs)"
-      ],
       # For windows
 
       "include_dirs": [
@@ -125,6 +123,9 @@
             ]
         }],
         [ "OS==\"win\"", {
+            "libraries": [
+              "<!@(node utils/find-opencv.js --libs)",
+            ],
             "cflags": [
               "-Wall"
             ],
@@ -140,6 +141,9 @@
         }],
         [ # cflags on OS X are stupid and have to be defined like this
           "OS==\"mac\"", {
+            "libraries": [
+              "<!(node utils/find-opencv.js --libs)",
+            ],
             "xcode_settings": {
             "OTHER_CFLAGS": [
               "-mmacosx-version-min=10.7",
