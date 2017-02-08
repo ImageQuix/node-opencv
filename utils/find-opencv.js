@@ -11,7 +11,7 @@ var flag = process.argv[2] || "--exists";
 var opencv = process.env.PKG_CONFIG_OPENCV3 === "1" ? "opencv3" : '"opencv >= 2.3.1"';
 
 function main(){
-    if (process.platform !== "win32") {
+    if (process.platform === "darwin") {
         var path = process.env.OPENCV_DIR;
         if (path[path.length - 1] === '/') {
             path = path.substr(0, path.length - 1);
@@ -23,8 +23,18 @@ function main(){
             console.log(`-I${path}/include/opencv -I${path}/include`);
         }
     }
-    else {
+    else if (process.platform === "win32") {
         fallback();
+    }
+    else {
+      exec("pkg-config " + opencv + " " + flag, function(error, stdout, stderr){
+        if(error){
+            throw new Error("ERROR: failed to run: pkg-config", opencv, flag);
+        }
+        else{
+            console.log(stdout);
+        }
+      });
     }
 }
 
