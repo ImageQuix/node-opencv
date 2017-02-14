@@ -34,6 +34,9 @@
 
       "conditions": [
         [ "OS==\"linux\" or OS==\"freebsd\" or OS==\"openbsd\" or OS==\"solaris\" or OS==\"aix\"", {
+            "libraries": [
+              "<!@(node utils/find-opencv.js --libs)"
+            ],
             "cflags": [
               "<!@(node utils/find-opencv.js --cflags)",
               "-Wall"
@@ -117,6 +120,9 @@
 
       "conditions": [
         [ "OS==\"linux\"", {
+            "libraries": [
+              "<!@(node utils/find-opencv.js --libs)"
+            ],
             "cflags": [
               "<!@(node utils/find-opencv.js --cflags)",
               "-Wall"
